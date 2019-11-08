@@ -2,8 +2,23 @@ console.log("Starting Node.JS server...");
 
 var http = require('http');
 var express = require('express');
+var mysql = require('mysql');
 
 var app = express();
+
+let con = mysql.createConnection({
+    host: "localhost",
+    user: "my_user_1",
+    password: "my_password_1"
+});
+
+con.connect(function(err) {
+    if (!err) {
+        console.log("ERROR: Failed to connect to database")
+    } else {
+        console.log("Database connected!");
+    }
+});
 
 // GET method route
 app.get('/', function (req, res) {
