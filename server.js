@@ -11,18 +11,28 @@ var mysql = require('mysql');
 var app = express();
 let port = 8080;
 
+let errorMsg = '[{\'data\' = \'null\'}]';
+let requestConsoleMsg = function(method, url, id, content) {
+    return "============================" +
+           "\nGot HTTP request:" +
+           "\n    Medthod: " + method +
+           "\n    URL: " + url +
+           (id ? "\n    ID: " + id : "") +
+           (content ? "\n    Content: " + content : "")
+}
+
 
 // -------------------------------
-// Connextion do database
+// Connection do database
 // -------------------------------
 
 let dbConnexionData = {
-    host       : 'localhost',
-    port       : '3307',
+    host       : 'database-nodejs',
+    port       : '3306',
     //socketPath : '/var/run/mysqld/mysqld.sock',
-    user       : 'root',
-    password   : '',
-    database   : 'cesibde'
+    user       : 'my_user_1',
+    password   : 'my_password_1',
+    database   : 'my_database_1'
 };
 
 let db = mysql.createConnection(dbConnexionData);
@@ -35,7 +45,7 @@ setTimeout(function() {
         }
         console.log('Database connected as id ' + db.threadId);
     });
-}, 10000)
+}, 15000)
 
 
 // -------------------------------
@@ -44,48 +54,53 @@ setTimeout(function() {
 
 // GET method routes
 app.get('/', function(req, res) {
-    console.log('GET request on ' + req.get('host') + req.originalUrl);
-
-    let data = "none";
+    console.log(requestConsoleMsg("GET", req.get('host') + req.originalUrl));
 
     db.query("SELECT * FROM users", function (err, result) {
-        console.log("Result: " + result);
-        data = result;
+        res.send(!err ? result : errorMsg)
     });
-
-    res.send('GET all users. Result = ' + data);
 });
 
 app.get('/:id', function(req, res) {
-    console.log('GET request on ' + req.get('host') + req.originalUrl);
+    let id = req.params.id;
 
-    let data = "none";
-    let id = 1;
+    console.log(requestConsoleMsg("GET", req.get('host') + req.originalUrl, id));
 
     db.query("SELECT * FROM users WHERE id=" + id, function (err, result) {
-        console.log("Result: " + result);
-        data = result;
+        res.send(!err ? result : errorMsg)
     });
-
-    res.send('GET user ' + id + '. Result = ' + data);
 });
 
 // POST method route
 app.post('/', function (req, res) {
-    console.log('POST request');
-    res.send('POST request to the homepage');
+    console.log(requestConsoleMsg("POST", req.get('host') + req.originalUrl, null, req.body.variable_name));
+    res.send('not implemented');
 });
 
 // PUT method route
 app.put('/', function (req, res) {
-    console.log('PUT request');
-    res.send('PUT request to the homepage');
+    console.log(requestConsoleMsg("POST", req.get('host') + req.originalUrl));
+    res.send(errorMsg);
+});
+
+app.put('/:id', function (req, res) {
+    let id = req.params.id;
+
+    console.log(requestConsoleMsg("POST", req.get('host') + req.originalUrl, id));
+    res.send('not implemented');
 });
 
 // DELETE method route
 app.delete('/', function (req, res) {
-    console.log('DELETE request');
-    res.send('DELETE request to the homepage');
+    console.log(requestConsoleMsg("DELETE", req.get('host') + req.originalUrl));
+    res.send(errorMsg);
+});
+
+app.delete('/:id', function (req, res) {
+    let id = req.params.id;
+
+    console.log(requestConsoleMsg("DELETE", req.get('host') + req.originalUrl, id));
+    res.send('not implemented');
 });
 
 
