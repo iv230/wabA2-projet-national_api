@@ -2,16 +2,17 @@
 // Requires
 // -------------------------------
 
-var express = require('express');
-var bodyParser = require("body-parser");
-var mysql = require('mysql');
+let express = require('express');
+let bodyParser = require("body-parser");
+let mysql = require('mysql');
+
 
 // -------------------------------
 // Global Variabmes
 // -------------------------------
 
-var hostname = 'localhost';
-var port = 8080;
+let hostname = 'localhost';
+let port = 8080;
 let errorMsg = '[{\'data\' = \'null\'}]';
 let successMsg = '[{\'success\' = \'true\'}]'
 let badRequestMsg = '[{\'badRequest\' = \'true\'}]'
@@ -21,8 +22,8 @@ let badRequestMsg = '[{\'badRequest\' = \'true\'}]'
 // Main objects
 // -------------------------------
 
-var app = express();
-var myRouter = express.Router();
+let app = express();
+let myRouter = express.Router();
 
 
 // -------------------------------
@@ -113,9 +114,9 @@ myRouter.route('/users')
         let school = req.body.school;
         let role = req.body.role;
 
-        if (name != null && name != undefined &&
-            email != null && email != undefined &&
-            passwordHash != null && passwordHash != undefined
+        if (name != null && name != undefined && name != 'undefined' &&
+            email != null && email != undefined && email != 'undefined' &&
+            passwordHash != null && passwordHash != undefined && passwordHash != 'undefined'
         ) {
             let request = "INSERT INTO users (name, email, passwordHash, school, role)" +
                 ` VALUES ('${name}', '${email}', '${passwordHash}', '${school}', '${role}')`
@@ -123,7 +124,7 @@ myRouter.route('/users')
             console.log(request);
 
             db.query(request, function (err, result) {
-                res.json(!err ? sucessMsg : errorMsg)
+                res.json(!err ? successMsg : errorMsg)
                 if (err) { console.log("[WARN] MySQL error: " + err) }
             });
         } else {
