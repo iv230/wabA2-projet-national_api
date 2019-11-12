@@ -1,21 +1,38 @@
 // -------------------------------
+// README
+// -------------------------------
+/*
+ * Please consule ressources below that helped to build this application
+ * - (fr) https://www.frugalprototype.com/developpez-propre-api-node-js-express/
+ * - (en) https://dev.to/medaymentn/securing-your-node-js-api-with-json-web-token-5o5
+ */
+
+
+// -------------------------------
 // Requires
 // -------------------------------
 
 let express = require('express');
 let bodyParser = require("body-parser");
 let mysql = require('mysql');
+let jwt = require('jsonwebtoken');
 
 
 // -------------------------------
 // Global Variabmes
 // -------------------------------
 
+let secretUser = "utilisateurultrasecretdelapi"
+let secretPassword = 'motdepasseultrascretdelapi';
+
 let hostname = 'localhost';
 let port = 8080;
+
 let errorMsg = '[{\'data\' = \'null\'}]';
 let successMsg = '[{\'success\' = \'true\'}]'
 let badRequestMsg = '[{\'badRequest\' = \'true\'}]'
+
+let consoleSeparator = "========================================================\n";
 
 
 // -------------------------------
@@ -23,7 +40,10 @@ let badRequestMsg = '[{\'badRequest\' = \'true\'}]'
 // -------------------------------
 
 let app = express();
-let myRouter = express.Router();
+let router = express.Router();
+
+app.set('Secret', secretPassword);
+app.use('/users', router);
 
 
 // -------------------------------
@@ -31,8 +51,8 @@ let myRouter = express.Router();
 // -------------------------------
 
 let requestConsoleMsg = function (method, url, content) {
-    return "========================================================" +
-        "\nGot HTTP request:" +
+    return consoleSeparator +
+        "Got HTTP request:" +
         "\n    Medthod: " + method +
         "\n    URL: " + url +
         (content ? "\n    Content: " + JSON.stringify(content) : "")
@@ -68,23 +88,46 @@ setTimeout(function () {
             console.error('Error connecting to MySQL: ' + err.stack);
             return;
         }
-        console.log('Database connected as id ' + db.threadId);
+        console.log(consoleSeparator + 'Database connected as id ' + db.threadId);
     });
 }, 15000)
+
+
+// -------------------------------
+// Token Protection
+// -------------------------------
+
+router.use((req, res, next) => {
+    // check header for the token
+    var token = req.headers['access-token'];
+
+    // decode token
+    if (token) {
+        // verifies secret and checks if the token is expired
+        jwt.verify(token, app.get('Secret'), (err, decoded) => {
+            if (err) {
+                return res.json({ message: 'invalid token' });
+            } else {
+                // if everything is good, save to request for use in other routes
+                req.decoded = decoded;
+                next();
+            }
+        });
+
+    } else {
+        res.send({
+            message: 'No token provided.'
+        });
+
+    }
+});
 
 
 // -------------------------------
 // Route and Application Core
 // -------------------------------
 
-myRouter.route('/')
-    .all(function (req, res) {
-        res.json({
-            message: "National BDE API", methode: req.method
-        });
-    });
-
-myRouter.route('/users')
+router.route('/users')
 
     .get(function (req, res) {
         console.log(requestConsoleMsg("GET", req.get('host') + req.originalUrl));
@@ -181,13 +224,42 @@ myRouter.route('/users')
         }
     });
 
+app.post('/auth', (req, res) => {
+    console.log(requestConsoleMsg("POST", req.get('host') + req.originalUrl, req.body));
+
+    if (req.body.username === secretUser) {
+
+        if (req.body.password === secretPassword) {
+            //if eveything is okey let's create our token 
+
+            const payload = {
+                check: true
+            };
+
+            var token = jwt.sign(payload, app.get('Secret'), {
+                expiresIn: 1440 // expires in 24 hours
+            });
+
+            res.json({
+                message: 'authentication done ',
+                token: token
+            });
+
+        } else {
+            res.json({ message: "please check your password !" })
+        }
+    } else {
+        res.json({ message: "user not found !" })
+    }
+})
+
 
 // -------------------------------
 // Starting Application
 // -------------------------------
 
-app.use(myRouter);
+app.use(router);
 
 app.listen(port, function () {
-    console.log("Running Node.JS Server on http://" + hostname + ":" + port);
+    console.log(consoleSeparator + "Running Node.JS Server on http://" + hostname + ":" + port);
 });
