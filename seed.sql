@@ -30,7 +30,7 @@ ALTER TABLE users
     ADD CONSTRAINT `FK_user_role` FOREIGN KEY (`role`) REFERENCES `roles` (`id`);
 
 INSERT INTO schools (`name`)
-VALUES ('Lile'),
+VALUES ('Lille'),
        ('Arras'),
        ('Brest'),
        ('Caen'),
