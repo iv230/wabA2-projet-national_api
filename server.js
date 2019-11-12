@@ -260,6 +260,6 @@ app.post('/auth', (req, res) => {
 
 app.use(router);
 
-app.listen(port, function () {
+app.listen(port, "0.0.0.0", function () {
     console.log(consoleSeparator + "Running Node.JS Server on http://" + hostname + ":" + port);
 });
