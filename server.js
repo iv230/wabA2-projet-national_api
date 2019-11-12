@@ -30,7 +30,6 @@ let port = 8080;
 
 let errorMsg = '[{\'data\' = \'null\'}]';
 let successMsg = '[{\'success\' = \'true\'}]'
-let badRequestMsg = '[{\'badRequest\' = \'true\'}]'
 
 let consoleSeparator = "========================================================\n";
 
@@ -57,6 +56,14 @@ let requestConsoleMsg = function (method, url, content) {
         "\n    URL: " + url +
         (content ? "\n    Content: " + JSON.stringify(content) : "")
 };
+
+let generateSuccessJson = function (content) {
+    return {
+        code: 200,
+        message: 'Success',
+        content: content
+    }
+}
 
 
 // -------------------------------
@@ -144,7 +151,14 @@ router.route('/users')
         console.log(request);
 
         db.query(request, function (err, result) {
-            res.json(!err ? result : 'Unable to answer request')
+            if (!err) {
+                res.json(generateSuccessJson(result));
+            } else {
+                res.json({
+                    code: 500,
+                    message: 'Internal server error'
+                })
+            }
         });
     })
 
@@ -168,11 +182,25 @@ router.route('/users')
 
             db.query(request, function (err, result) {
                 res.json(!err ? successMsg : errorMsg)
-                if (err) { console.log("[WARN] MySQL error: " + err) }
+
+                if (!err) {
+                    res.json(generateSuccessJson(result));
+                }
+                else {
+                    console.log("[WARN] MySQL error: " + err);
+                    res.json({
+                        code: 500,
+                        message: 'Internal server error'
+                    })
+                }
             });
         } else {
             console.log('Failed to POST: ' + `${name}, ${email}, ${passwordHash}, ${school}, ${role}`);
-            res.json('Cannot create user while at least one value is missing');
+            
+            res.json({
+                code: 400,
+                content: 'At least one value is missing'
+            });
         }
     })
 
@@ -182,7 +210,10 @@ router.route('/users')
         let id = req.query.id;
 
         if (!id) {
-            res.json('Cannot update user while no ID is specified');
+            res.json({
+                code: 400,
+                message: 'Cannot update user while no ID is specified'
+            });
         } else {
             let request = "UPDATE users SET ";
 
@@ -199,11 +230,22 @@ router.route('/users')
                 console.log(request);
 
                 db.query(request, function (err, result) {
-                    res.json(!err ? successMsg : errorMsg)
-                    if (err) { console.log("[WARN] MySQL error: " + err) }
+                    if (!err) {
+                        res.json(generateSuccessJson(result));
+                    } else {
+                        console.log("[WARN] MySQL error: " + err)
+
+                        res.json({
+                            code: 500,
+                            message: 'Internal server error'
+                        })
+                    }
                 });
             } else {
-                res.json('Cannot update user while no values to change');
+                res.json({
+                    code: 400,
+                    message: 'Cannot update user while no values to change'
+                });
             }
         }
     })
@@ -217,10 +259,22 @@ router.route('/users')
             let request = `DELETE FROM users WHERE id=${id}`;
 
             db.query(request, function (err, result) {
-                res.json(!err ? successMsg : errorMsg);
+                if (!err) {
+                    res.json(generateSuccessJson(result));
+                } else {
+                    console.log("[WARN] MySQL error: " + err)
+
+                    res.json({
+                        code: 500,
+                        message: 'Internal server error'
+                    })
+                }
             })
         } else {
-            res.json('Cannot delete user while no ID is specified');
+            res.json({
+                code: 400,
+                message: 'Cannot delete user while no ID is specified'
+            });
         }
     });
 
@@ -230,26 +284,34 @@ app.post('/auth', (req, res) => {
     if (req.body.username === secretUser) {
 
         if (req.body.password === secretPassword) {
-            //if eveything is okey let's create our token 
 
             const payload = {
                 check: true
             };
 
             var token = jwt.sign(payload, app.get('Secret'), {
-                expiresIn: 1440 // expires in 24 hours
+                expiresIn: 1
             });
 
             res.json({
-                message: 'authentication done ',
-                token: token
+                message: 'Success',
+                code: 200,
+                content: {
+                    token: token
+                }
             });
 
         } else {
-            res.json({ message: "please check your password !" })
+            res.json({
+                message: "Wrong password",
+                code: 401
+            })
         }
     } else {
-        res.json({ message: "user not found !" })
+        res.json({
+            message: "No credential given",
+            code: 422,
+        })
     }
 })
 
