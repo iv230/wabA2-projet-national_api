@@ -181,8 +181,6 @@ router.route('/users')
             console.log(request);
 
             db.query(request, function (err, result) {
-                res.json(!err ? successMsg : errorMsg)
-
                 if (!err) {
                     res.json(generateSuccessJson(result));
                 }
