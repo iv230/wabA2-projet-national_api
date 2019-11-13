@@ -196,7 +196,7 @@ router.route('/users')
             });
         } else {
             console.log('Failed to POST: ' + `${name}, ${email}, ${passwordHash}, ${school}, ${role}`);
-            
+
             res.json({
                 code: 400,
                 content: 'At least one value is missing'
@@ -277,6 +277,62 @@ router.route('/users')
             });
         }
     });
+
+app.get('/role', (req, res) => {
+    console.log(requestConsoleMsg("GET", req.get('host') + req.originalUrl));
+
+    let id = req.body.id;
+
+    if (id) {
+        let request = "SELECT * FROM roles WHERE id=" + id;
+        console.log(request);
+    
+        db.query(request, function (err, result) {
+            if (!err) {
+                res.json(generateSuccessJson(result));
+            } else {
+                res.json({
+                    code: 500,
+                    message: 'Internal server error'
+                })
+            }
+        });
+    }
+    else {
+        res.json({
+            code: 400,
+            message: 'Cannot get role while no ID is specified'
+        });
+    } 
+});
+
+app.get('/school', (req, res) => {
+    console.log(requestConsoleMsg("GET", req.get('host') + req.originalUrl));
+
+    let id = req.body.id;
+
+    if (id) {
+        let request = "SELECT * FROM schools WHERE id=" + id;
+        console.log(request);
+    
+        db.query(request, function (err, result) {
+            if (!err) {
+                res.json(generateSuccessJson(result));
+            } else {
+                res.json({
+                    code: 500,
+                    message: 'Internal server error'
+                })
+            }
+        });
+    }
+    else {
+        res.json({
+            code: 400,
+            message: 'Cannot get role while no ID is specified'
+        });
+    } 
+});
 
 app.post('/auth', (req, res) => {
     console.log(requestConsoleMsg("POST", req.get('host') + req.originalUrl, req.body));
