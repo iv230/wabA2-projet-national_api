@@ -276,60 +276,52 @@ router.route('/users')
         }
     });
 
-app.get('/role', (req, res) => {
+app.get('/roles', (req, res) => {
     console.log(requestConsoleMsg("GET", req.get('host') + req.originalUrl));
 
-    let id = req.body.id;
+    let condition = "";
 
-    if (id) {
-        let request = "SELECT * FROM roles WHERE id=" + id;
-        console.log(request);
-    
-        db.query(request, function (err, result) {
-            if (!err) {
-                res.json(generateSuccessJson(result));
-            } else {
-                res.json({
-                    code: 500,
-                    message: 'Internal server error'
-                })
-            }
-        });
+    if (req.query.id) {
+        condition = " WHERE id=" + req.query.id;
     }
-    else {
-        res.json({
-            code: 400,
-            message: 'Cannot get role while no ID is specified'
-        });
-    } 
+
+    let request = "SELECT * FROM roles" + condition;
+    console.log(request);
+
+    db.query(request, function (err, result) {
+        if (!err) {
+            res.json(generateSuccessJson(result));
+        } else {
+            res.json({
+                code: 500,
+                message: 'Internal server error'
+            })
+        }
+    });
 });
 
-app.get('/school', (req, res) => {
+app.get('/schools', (req, res) => {
     console.log(requestConsoleMsg("GET", req.get('host') + req.originalUrl));
 
-    let id = req.body.id;
+    let condition = "";
 
-    if (id) {
-        let request = "SELECT * FROM schools WHERE id=" + id;
-        console.log(request);
-    
-        db.query(request, function (err, result) {
-            if (!err) {
-                res.json(generateSuccessJson(result));
-            } else {
-                res.json({
-                    code: 500,
-                    message: 'Internal server error'
-                })
-            }
-        });
+    if (req.query.id) {
+        condition = " WHERE id=" + req.query.id;
     }
-    else {
-        res.json({
-            code: 400,
-            message: 'Cannot get role while no ID is specified'
-        });
-    } 
+
+    let request = "SELECT * FROM schools" + condition;
+    console.log(request);
+
+    db.query(request, function (err, result) {
+        if (!err) {
+            res.json(generateSuccessJson(result));
+        } else {
+            res.json({
+                code: 500,
+                message: 'Internal server error'
+            })
+        }
+    });
 });
 
 app.post('/auth', (req, res) => {
