@@ -336,7 +336,7 @@ app.post('/auth', (req, res) => {
             };
 
             var token = jwt.sign(payload, app.get('Secret'), {
-                expiresIn: 1
+                expiresIn: 5
             });
 
             res.json({
