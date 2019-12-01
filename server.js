@@ -5,6 +5,8 @@
  * Please consule ressources below that helped to build this application
  * - (fr) https://www.frugalprototype.com/developpez-propre-api-node-js-express/
  * - (en) https://dev.to/medaymentn/securing-your-node-js-api-with-json-web-token-5o5
+ * 
+ * I'm glad that someone read that. And I'll be glad if someone says me that he/she read that.
  */
 
 
@@ -16,6 +18,7 @@ let express = require('express');
 let bodyParser = require("body-parser");
 let mysql = require('mysql');
 let jwt = require('jsonwebtoken');
+let passwordHash = require('password-hash');
 
 
 // -------------------------------
@@ -23,13 +26,11 @@ let jwt = require('jsonwebtoken');
 // -------------------------------
 
 let secretUser = "utilisateurultrasecretdelapi"
-let secretPassword = 'motdepasseultrascretdelapi';
+//let secretPassword = 'motdepasseultrascretdelapi';
+let secretPassword = '5e7bce0af79d01bb4cd9f1aa3c8e5dc972db0401';
 
 let hostname = 'localhost';
 let port = 8080;
-
-let errorMsg = '[{\'data\' = \'null\'}]';
-let successMsg = '[{\'success\' = \'true\'}]'
 
 let consoleSeparator = "========================================================\n";
 
